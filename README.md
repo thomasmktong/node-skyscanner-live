@@ -8,45 +8,34 @@ This Node.js module provides a simplified call to poll Skyscanner Live Prices.
 
 ## Usage
 
- Require this library and set the API key. You can get your API key by signing into the [Skyscanner Business Portal](http://portal.business.skyscanner.net/en-gb/accounts/login/).
+Set the API key. You can get your API key by signing into the [Skyscanner Business Portal](http://portal.business.skyscanner.net/en-gb/accounts/login/).
 
 ```javascript
 var skyscanner = require('node-skyscanner-live');
 skyscanner.setApiKey('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 ```
 
-Use `getLocation` function to retrieve a well-formatted location ID, which will be used for fetching flight ticket prices.
+Use `getLocation` function to find location IDs by keywords. The Skyscanner API can handle typos too. These IDs are needed when fetching flight ticket prices.
 
 ```javascript
-skyscanner.getLocation('hong').then(function (data) {
+skyscanner.getLocation('herthrow').then(function (data) {
     console.log(data);
 });
 ```
 
-Results is shown below:
-
 ```javascript
-[ { id: 'HKG-sky', name: 'Hong Kong International' },
-  { id: 'SHA-sky', name: 'Shanghai Hongqiao' },
-  { id: 'HGN-sky', name: 'Mae Hong Son' },
-  { id: 'PYY-sky', name: 'Pai (Mae Hong Son)' },
-  { id: 'HPG-sky', name: 'Hongping' },
-  { id: 'AHJ-sky', name: 'Aba/Hongyuan' },
-  { id: 'PVG-sky', name: 'Shanghai Pu Dong' },
-  { id: 'HGH-sky', name: 'Hangzhou' },
-  { id: 'CKG-sky', name: 'Chongqing' },
-  { id: 'HU-sky', name: 'Hungary' } ]
+[ { id: 'LHR-sky', name: 'London Heathrow' } ]
 ```
 
-Use `search` function to poll Skyscanner's API and get a list of air tickets. Since this is on-demand real-time search, the time takes to execute this function may vary. In Skyscanner's original API, you have to continuously poll a URL until the result JSON is fully propulated. This has caused complexities in handling Promise of waits, retries, together with logic to determine if API limit has been breached. This module has encapsulated all these in a simple function.
+Use `search` function to poll Skyscanner's API and get a list of air tickets. You have to use location IDs and “yyyy-mm-dd”, “yyyy-mm” or “anytime” for the dates.
+
+Since this is real-time search, the time takes to execute this function may vary. In Skyscanner's original API, you have to continuously poll a URL until the result JSON is fully propulated. It has caused complexities in handling Promise of waits, retries, together with logic to determine if API limit has been breached. This module has encapsulated all those in a simple function.
 
 ```javascript
 skyscanner.search('HKG-sky', 'LHR-sky', '2017-03-08', '2017-03-31').then(function (data) {
     console.log(data[0]);
 });
 ```
-
-Results is shown below:
 
 ```javascript
 { outbound: 
@@ -69,6 +58,6 @@ Results is shown below:
 
 ## Credits
 
-This is a part of the work done in Hong Kong #1 Bot Hackathon organized by [Recime.io](https://docs.recime.io/). I and my teammates built a chatbot to suggest tourist attractions and find cheapest flight tickets. We have become one of the winning teams.
+This is a part of the work done in Hong Kong #1 Bot Hackathon organized by [Recime.io](https://docs.recime.io/). I and my teammates built a chatbot to suggest tourist attractions and find cheapest flight tickets. We have become the runner-up in the event.
 
-[Photo 1](https://twitter.com/thomasmktong/status/838347846663426049), [Photo 2](https://twitter.com/thomasmktong/status/838395615134400512)
+[Photo 1](https://twitter.com/thomasmktong/status/838347846663426049), [Photo 2](https://twitter.com/thomasmktong/status/838395615134400512), [Photos by Recime](https://twitter.com/GetRecime/status/838463271128596483)
