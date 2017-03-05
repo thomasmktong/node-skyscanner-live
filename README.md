@@ -15,7 +15,7 @@ var skyscanner = require('node-skyscanner-live');
 skyscanner.setApiKey('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 ```
 
-Use `getLocation` function to retrieve a well-formatted location ID. This ID will be used for fetching flight ticket prices.
+Use `getLocation` function to retrieve a well-formatted location ID, which will be used for fetching flight ticket prices.
 
 ```javascript
 skyscanner.getLocation('hong').then(function (data) {
@@ -38,7 +38,7 @@ Results is shown below:
   { id: 'HU-sky', name: 'Hungary' } ]
 ```
 
-Use `search` function to poll Skyscanner's API and get a list of air tickets. Since this is on-demand real-time search, the time takes to execute this function varies. In Skyscanner's original API, you have to continuously polling a URL until the result JSON is fully proulated. This has caused complexities in handling Promise of waits, retries, together with logic to determine if API limit has been breached. This module has encapsulated all this in a simple function.
+Use `search` function to poll Skyscanner's API and get a list of air tickets. Since this is on-demand real-time search, the time takes to execute this function may vary. In Skyscanner's original API, you have to continuously poll a URL until the result JSON is fully propulated. This has caused complexities in handling Promise of waits, retries, together with logic to determine if API limit has been breached. This module has encapsulated all these in a simple function.
 
 ```javascript
 skyscanner.search('HKG-sky', 'LHR-sky', '2017-03-08', '2017-03-31').then(function (data) {
