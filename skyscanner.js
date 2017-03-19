@@ -38,13 +38,14 @@ module.exports = {
 
             var toReturn = data.Quotes.map(function (quote) {
 
-                var segments = [quote.OutboundLeg, quote.InboundLeg].map(function (segment) {
+                var segments = [quote.OutboundLeg, quote.InboundLeg].map(function (segment, index) {
 
                     var departPlace = _.filter(data.Places, { PlaceId: segment.OriginId })[0];
                     var arrivePlace = _.filter(data.Places, { PlaceId: segment.DestinationId })[0];
                     var carriers = segment.CarrierIds.map(c => _.filter(data.Carriers, { CarrierId: c })[0].Name);
 
                     return {
+                        group: index + 1,
                         departAirport: { code: departPlace.IataCode, name: departPlace.Name },
                         arriveAirport: { code: arrivePlace.IataCode, name: arrivePlace.Name },
                         departCity: { code: departPlace.CityId, name: departPlace.CityName },
@@ -56,11 +57,11 @@ module.exports = {
 
                 return {
                     segments: segments,
-                    price: quote.minPrice,
+                    price: quote.MinPrice,
                 }
             });
 
-            return data;
+            return toReturn;
         });
     },
 
@@ -107,7 +108,7 @@ module.exports = {
                     var outboundLeg = _.filter(data.Legs, { Id: itin.OutboundLegId })[0];
                     var inboundLeg = _.filter(data.Legs, { Id: itin.InboundLegId })[0];
 
-                    var segments = outboundLeg.SegmentIds.concat(inboundLeg.SegmentIds).map(function (segmentId) {
+                    var segments = outboundLeg.SegmentIds.concat(inboundLeg.SegmentIds).map(function (segmentId, index) {
 
                         var segment = _.filter(data.Segments, { Id: segmentId })[0];
                         var departAirport = _.filter(data.Places, { Id: segment.OriginStation })[0];
@@ -117,6 +118,7 @@ module.exports = {
                         var carriers = _.union(_.filter(data.Carriers, { Id: segment.OperatingCarrier }), _.filter(data.Carriers, { Id: segment.Carrier }));
 
                         return {
+                            group: index < outboundLeg.SegmentIds.length ? 1 : 2,
                             departAirport: { code: departAirport.Code, name: departAirport.Name },
                             arriveAirport: { code: arriveAirport.Code, name: arriveAirport.Name },
                             departCity: { code: departCity.Code, name: departCity.Name },

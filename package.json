@@ -1,6 +1,6 @@
 {
   "name": "node-skyscanner-live",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "description": "Node.js module to poll skyscanner live prices",
   "main": "skyscanner.js",
   "scripts": {
