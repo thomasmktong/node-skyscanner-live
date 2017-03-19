@@ -32,25 +32,48 @@ Use `search` function to poll Skyscanner's API and get a list of air tickets. Yo
 Since this is real-time search, the time takes to execute this function may vary. In Skyscanner's original API, you have to continuously poll a URL until the result JSON is fully propulated. It has caused complexities in handling Promise of waits, retries, together with logic to determine if API limit has been breached. This module has encapsulated all those in a simple function.
 
 ```javascript
-skyscanner.search('HKG-sky', 'LHR-sky', '2017-03-08', '2017-03-31').then(function (data) {
-    console.log(data[0]);
+skyscanner.search('HKG-sky', 'LHR-sky', '2017-06-20', '2017-06-30').then(function (data) {
+    console.log(util.inspect(data[0], false, 99999));
 });
 ```
 
 ```javascript
-{ outbound: 
-   { departTime: '2017-03-08T11:55:00',
-     arriveTime: '2017-03-08T21:05:00',
-     stops: 2,
-     carriers: [ 'Aeroflot' ] },
-  inbound: 
-   { departTime: '2017-03-31T10:40:00',
-     arriveTime: '2017-04-01T09:45:00',
-     stops: 2,
-     carriers: [ 'Aeroflot' ] },
-  price: 6446,
-  url: 'http://partners.api.skyscanner.net/apiservices/deeplink/v2?_cje=xxx' }
+{ segments: 
+   [ { departAirport: { code: 'HKG', name: 'Hong Kong International' },
+       arriveAirport: { code: 'PEK', name: 'Beijing Capital' },
+       departCity: { code: 'HKG', name: 'Hong Kong' },
+       arriveCity: { code: 'BJS', name: 'Beijing' },
+       departTime: '2017-06-20T10:30:00',
+       arriveTime: '2017-06-20T13:55:00',
+       carrier: [ 'Air China' ] },
+     { departAirport: { code: 'PEK', name: 'Beijing Capital' },
+       arriveAirport: { code: 'LHR', name: 'London Heathrow' },
+       departCity: { code: 'BJS', name: 'Beijing' },
+       arriveCity: { code: 'LON', name: 'London' },
+       departTime: '2017-06-20T17:05:00',
+       arriveTime: '2017-06-20T20:40:00',
+       carrier: [ 'Air China' ] },
+     { departAirport: { code: 'LHR', name: 'London Heathrow' },
+       arriveAirport: { code: 'PEK', name: 'Beijing Capital' },
+       departCity: { code: 'LON', name: 'London' },
+       arriveCity: { code: 'BJS', name: 'Beijing' },
+       departTime: '2017-06-30T22:40:00',
+       arriveTime: '2017-07-01T15:50:00',
+       carrier: [ 'Air China' ] },
+     { departAirport: { code: 'PEK', name: 'Beijing Capital' },
+       arriveAirport: { code: 'HKG', name: 'Hong Kong International' },
+       departCity: { code: 'BJS', name: 'Beijing' },
+       arriveCity: { code: 'HKG', name: 'Hong Kong' },
+       departTime: '2017-07-02T08:05:00',
+       arriveTime: '2017-07-02T11:35:00',
+       carrier: [ 'Air China' ] } ],
+  price: 4301.11,
+  url: 'http://partners.api.skyscanner.net/apiservices/deeplink/v2?_cje=x' }
 ```
+
+## Improvements Needed
+
+Right now this API is mainly targeting users in Hong Kong. There are works needed to be done to make this more global and generic. Pull requests are welcome.
 
 ## More Details
 
@@ -58,6 +81,6 @@ skyscanner.search('HKG-sky', 'LHR-sky', '2017-03-08', '2017-03-31').then(functio
 
 ## Credits
 
-This is a part of the work done in Hong Kong #1 Bot Hackathon organized by [Recime.io](https://docs.recime.io/). I and my teammates built a chatbot to suggest tourist attractions and find cheapest flight tickets. We have become the runner-up in the event.
+This is a part of the work done in Hong Kong First Bot Hackathon organized by [Recime.io](https://docs.recime.io/). I and my teammates built a chatbot that suggests tourist attractions and finds cheapest flight tickets. We became the 1st runner-up in the event.
 
 [Photo 1](https://twitter.com/thomasmktong/status/838347846663426049), [Photo 2](https://twitter.com/thomasmktong/status/838395615134400512), [Photos by Recime](https://twitter.com/GetRecime/status/838463271128596483)

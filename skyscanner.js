@@ -1,7 +1,7 @@
 var promise = require('bluebird');
 var request = require('request-promise');
-var lodash = require('lodash');
 var util = require('util');
+var _ = require('lodash');
 
 module.exports = {
 
@@ -21,6 +21,46 @@ module.exports = {
             return data.Places.map(function (loc) {
                 return { id: loc.PlaceId, name: loc.PlaceName };
             });
+        });
+    },
+
+    searchCache: function (fromLocation, toLocation, fromDate, toDate) {
+        var url = util.format(
+            'http://partners.api.skyscanner.net/apiservices/browsequotes/v1.0/HK/HKD/en-US/%s/%s/%s/%s?apiKey=%s',
+            encodeURIComponent(fromLocation),
+            encodeURIComponent(toLocation),
+            encodeURIComponent(fromDate),
+            encodeURIComponent(toDate),
+            this.apiKey);
+
+        return request(url).then(function (body) {
+            var data = JSON.parse(body);
+
+            var toReturn = data.Quotes.map(function (quote) {
+
+                var segments = [quote.OutboundLeg, quote.InboundLeg].map(function (segment) {
+
+                    var departPlace = _.filter(data.Places, { PlaceId: segment.OriginId })[0];
+                    var arrivePlace = _.filter(data.Places, { PlaceId: segment.DestinationId })[0];
+                    var carriers = segment.CarrierIds.map(c => _.filter(data.Carriers, { CarrierId: c })[0].Name);
+
+                    return {
+                        departAirport: { code: departPlace.IataCode, name: departPlace.Name },
+                        arriveAirport: { code: arrivePlace.IataCode, name: arrivePlace.Name },
+                        departCity: { code: departPlace.CityId, name: departPlace.CityName },
+                        arriveCity: { code: arrivePlace.CityId, name: arrivePlace.CityName },
+                        departTime: segment.DepartureDate,
+                        carriers: carriers
+                    };
+                });
+
+                return {
+                    segments: segments,
+                    price: quote.minPrice,
+                }
+            });
+
+            return data;
         });
     },
 
@@ -64,30 +104,31 @@ module.exports = {
 
                 var toReturn = data.Itineraries.map(function (itin) {
 
-                    var outboundLeg = lodash.filter(data.Legs, { Id: itin.OutboundLegId })[0];
-                    var inboundLeg = lodash.filter(data.Legs, { Id: itin.InboundLegId })[0];
+                    var outboundLeg = _.filter(data.Legs, { Id: itin.OutboundLegId })[0];
+                    var inboundLeg = _.filter(data.Legs, { Id: itin.InboundLegId })[0];
 
-                    var outboundCarriers = outboundLeg.OperatingCarriers.map(function (cariId) {
-                        return lodash.filter(data.Carriers, { Id: cariId })[0].Name;
-                    });
+                    var segments = outboundLeg.SegmentIds.concat(inboundLeg.SegmentIds).map(function (segmentId) {
 
-                    var inboundCarriers = inboundLeg.OperatingCarriers.map(function (cariId) {
-                        return lodash.filter(data.Carriers, { Id: cariId })[0].Name;
+                        var segment = _.filter(data.Segments, { Id: segmentId })[0];
+                        var departAirport = _.filter(data.Places, { Id: segment.OriginStation })[0];
+                        var arriveAirport = _.filter(data.Places, { Id: segment.DestinationStation })[0];
+                        var departCity = !departAirport.ParentId ? departAirport : _.filter(data.Places, { Id: departAirport.ParentId })[0];
+                        var arriveCity = !arriveAirport.ParentId ? arriveAirport : _.filter(data.Places, { Id: arriveAirport.ParentId })[0];
+                        var carriers = _.union(_.filter(data.Carriers, { Id: segment.OperatingCarrier }), _.filter(data.Carriers, { Id: segment.Carrier }));
+
+                        return {
+                            departAirport: { code: departAirport.Code, name: departAirport.Name },
+                            arriveAirport: { code: arriveAirport.Code, name: arriveAirport.Name },
+                            departCity: { code: departCity.Code, name: departCity.Name },
+                            arriveCity: { code: arriveCity.Code, name: arriveCity.Name },
+                            departTime: segment.DepartureDateTime,
+                            arriveTime: segment.ArrivalDateTime,
+                            carrier: carriers.map(c => c.Name)
+                        };
                     });
 
                     return {
-                        outbound: {
-                            departTime: outboundLeg.Departure,
-                            arriveTime: outboundLeg.Arrival,
-                            stops: outboundLeg.SegmentIds.length,
-                            carriers: outboundCarriers
-                        },
-                        inbound: {
-                            departTime: inboundLeg.Departure,
-                            arriveTime: inboundLeg.Arrival,
-                            stops: inboundLeg.SegmentIds.length,
-                            carriers: inboundCarriers
-                        },
+                        segments: segments,
                         price: itin.PricingOptions[0].Price,
                         url: itin.PricingOptions[0].DeeplinkUrl
                     };
