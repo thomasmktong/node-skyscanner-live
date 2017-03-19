@@ -64,7 +64,7 @@ module.exports = {
         });
     },
 
-    search: function (fromLocation, toLocation, fromDate, toDate, adults, children, infants) {
+    search: function (fromLocation, toLocation, fromDate, toDate, adults, children, infants, fastMode) {
 
         var apiKey = this.apiKey;
         var delay = 1000;
@@ -99,7 +99,7 @@ module.exports = {
 
         return request(options).then(function (session) {
 
-            return pull(session.url, pull, delay).then(function (body) {
+            return pull(session.url, pull, delay, fastMode).then(function (body) {
                 var data = JSON.parse(body);
 
                 var toReturn = data.Itineraries.map(function (itin) {
@@ -139,15 +139,16 @@ module.exports = {
         });
     },
 
-    pull: function (url, self, delay) {
+    pull: function (url, self, delay, fastMode) {
 
         var pullinner = function () {
 
             var currentRequest = request(url);
             return currentRequest.then(function (body) {
-
                 var data = JSON.parse(body);
-                if (data.Status === "UpdatesPending") {
+                if (fastMode && data.Itineraries.length) {
+                    return currentRequest;
+                } else if (data.Status === "UpdatesPending") {
                     return self(url, self, delay);
                 } else if (data.Status === "UpdatesComplete") {
                     return currentRequest;
@@ -155,7 +156,6 @@ module.exports = {
                     return null;
                 }
             }, function (error) {
-
                 if (error.statusCode === 304) {
                     return self(url, self, delay);
                 } else if (error.statusCode === 429) {

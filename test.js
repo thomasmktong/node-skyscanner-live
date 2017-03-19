@@ -8,6 +8,6 @@ skyscanner.getLocation('herthrow').then(function (data) {
     console.log(data);
 });
 
-skyscanner.search('HKG-sky', 'LHR-sky', '2017-06-20', '2017-06-30').then(function (data) {
+skyscanner.search('HKG-sky', 'LHR-sky', '2017-06-20', '2017-06-30', 1, 0, 0, true).then(function (data) {
     console.log(util.inspect(data[0], false, 99999));
 });
